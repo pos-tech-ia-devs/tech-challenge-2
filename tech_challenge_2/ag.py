@@ -14,58 +14,62 @@ from coins import (
 
 # Good indice to cripto is between 2% and 10%
 risk_free_rate = 0.06
-good_sharpe_ratio = 1.5
 
 
 def generate_population(coins_quantity, population_size=10):
     possibles_coins = get_coins()
+    population = []
+    unique_individuals = set()
 
     def generate_individual(possibles_coins, num_coins):
-        coins = random.sample(possibles_coins, num_coins)
+        coins = tuple(random.sample(possibles_coins, num_coins))
         weights = [random.random() for _ in range(num_coins)]
-
         sum_weights = sum(weights)
-        normalized_weights = [round(w / sum_weights, 2) for w in weights]
-        return {"coins": coins, "weights": normalized_weights, "fitness": None}
+        normalized_weights = tuple(round(w / sum_weights, 2) for w in weights)
+        return coins, normalized_weights
 
-    population = []
-    for _ in range(population_size):
-        population.append(generate_individual(possibles_coins, coins_quantity))
+    while len(population) < population_size:
+        coins, weights = generate_individual(possibles_coins, coins_quantity)
+        individual_signature = (coins, weights)
+        if individual_signature not in unique_individuals:
+            unique_individuals.add(individual_signature)
+            population.append(
+                {"coins": list(coins), "weights": list(weights), "fitness": None}
+            )
 
     return population
 
 
-def calculate_fitness():
-    new_wallets = generate_population(coins_quantity=6)
-    for new_wallet in new_wallets:
+def calculate_fitness(population):
+    # new_wallets = generate_population(coins_quantity=6)
+    for wallet in population:
         mean_returns = []
 
-        for coin in new_wallet["coins"]:
+        for coin in wallet["coins"]:
             coin_data = get_coin_return(coin)
             mean_returns.append(coin_data["mean_day_return"])
 
-        cov_matrix = calculate_covariance_matrix(new_wallet["coins"])
+        cov_matrix = calculate_covariance_matrix(wallet["coins"])
 
         sharpe_ratio = calculate_portfolio_sharpe(
-            new_wallet["weights"], mean_returns, cov_matrix, risk_free_rate
+            wallet["weights"], mean_returns, cov_matrix, risk_free_rate
         )
 
-        print(f"new_wallet: {new_wallet['coins']}")
-        print(f"Weights: {new_wallet['weights']}")
-        print(f"Sharpe Ratio: {sharpe_ratio}")
-        print("---------------------------")
+        # print(f"wallet: {wallet['coins']}")
+        # print(f"Weights: {wallet['weights']}")
+        # print(f"Sharpe Ratio: {sharpe_ratio}")
+        # print("---------------------------")
 
         return {
-            "coins": new_wallet["coins"],
-            "weights": new_wallet["weights"],
+            "coins": wallet["coins"],
+            "weights": wallet["weights"],
             "fitness": sharpe_ratio,
         }
 
 
-def verify_finishing_condition(population, threshold=good_sharpe_ratio):
-    for individual in population:
-        if individual["fitness"] >= threshold:
-            return True
+def verify_finishing_condition(population, threshold):
+    if population["fitness"] >= threshold:
+        return True
     return False
 
 
@@ -86,7 +90,7 @@ def crossover(parent1, parent2):
             for index_compare, coin_compare in enumerate(parent2["coins"]):
 
                 if coin_base == coin_compare:
-                    # Só poderá ter duas moedas repetidas
+                    # can only have two repeats
                     mean_weights = (
                         parent1["weights"][index_base]
                         + parent2["weights"][index_compare]
@@ -114,7 +118,7 @@ def crossover(parent1, parent2):
         sum_weights = sum(weights)
         return [round(w / sum_weights, 2) for w in weights]
 
-    # Agora todos os pesos somam 1
+    # Now all weights are normalized
     weights = normalized_weights(weights)
 
     return {
@@ -124,31 +128,31 @@ def crossover(parent1, parent2):
     }
 
 
-# Codificação Combinatória: Mutação por Inversão
+# Codification: Mutation by Inversion
 def mutate(wallet):
     total_coins = len(wallet["coins"])
     min_mutate_rate = random.randint(0, total_coins - 2)
     max_mutate_rate = random.randint(min_mutate_rate + 1, total_coins - 1)
 
-    print(f"total_coins: {total_coins}")
-    print(f"min_mutate_rate: {min_mutate_rate}")
-    print(f"max_mutate_rate: {max_mutate_rate}")
-    print(f"---------------------------------")
+    # print(f"total_coins: {total_coins}")
+    # print(f"min_mutate_rate: {min_mutate_rate}")
+    # print(f"max_mutate_rate: {max_mutate_rate}")
+    # print(f"---------------------------------")
 
     def apply_mutate(arr, init, end):
         if init < 0 or end >= len(arr) or init > end:
             raise ValueError("Intervalo inválido.")
 
-        # Inverter o intervalo
+        # Invert the interval
         arr[init : end + 1] = arr[init : end + 1][::-1]
         return arr
 
-    print(f"Original Wallet: {wallet}")
+    # print(f"Original Wallet: {wallet}")
     wallet["coins"] = apply_mutate(wallet["coins"], min_mutate_rate, max_mutate_rate)
     wallet["weights"] = apply_mutate(
         wallet["weights"], min_mutate_rate, max_mutate_rate
     )
 
-    print(f"------------------------")
-    print(f"Mutated Wallet: {wallet}")
+    # print(f"------------------------")
+    # print(f"Mutated Wallet: {wallet}")
     return wallet
