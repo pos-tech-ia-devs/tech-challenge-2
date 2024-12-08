@@ -14,7 +14,8 @@ from ag import (
     generate_population,
     calculate_fitness,
     verify_finishing_condition,
-    selection,
+    selection_elitism,
+    selection_tournament,
     crossover,
     mutate,
 )
@@ -24,35 +25,52 @@ wallet = []
 
 def main():
     running = True
+    has_elitism = False
+    numGeneration = 1
 
+    ## generates population of ten wallets with 6 coins each
+    population = generate_population(
+        coins_quantity=6, population_size=population_size
+    )
+    print(population)
     while running:
-        population = generate_population(
-            coins_quantity=6, population_size=population_size
-        )
+        print(f"Generation: {numGeneration}")
+        print("-------------------------------------------------")
+        ## calculates the fitness of each wallet
+        population_with_fitness = calculate_fitness(population)
 
-        fitness = calculate_fitness(population)
-        # print(fitness, good_sharpe_ratio)
+        ## check if the finishing condition is met
+        can_stop = verify_finishing_condition(population_with_fitness, good_sharpe_ratio)
 
-        can_stop = verify_finishing_condition(fitness, good_sharpe_ratio)
-
+        ## if the finishing condition is met, print the best wallet and stop the loop
         if can_stop:
-            print(f"Best wallet: {fitness}")
-
+            print(f"Best wallet: {population_with_fitness}")
             running = False
             break
 
-        # selected = selection(fitness) ????
-        # new_individual = crossover(selected)
-        # mutated_individual = mutate(new_individual)
 
-        new_population = [population[0]]
+        ## selection of the best wallets
+        selected = []
+        if has_elitism:
+            selected = selection_elitism(population_with_fitness)
+        else:
+           selected = selection_tournament(population_with_fitness)
+
+
+        new_individual = crossover(random.choices(selected, k=1)[0], random.choices(selected, k=1)[0])
+        mutated_individual = mutate(new_individual)
+
+        new_population = [mutated_individual]
+        print(f"new population: {new_population}")
         while len(new_population) < population_size:
             parent1, parent2 = random.choices(population[:population_size], k=2)
             child = crossover(parent1, parent2)
             child = mutate(child)
-            # child2 = mutate(child2)
             new_population.extend([child])
 
+        # overrides the population
+        population.clear()
         population = new_population
         print(population)
         print("-------------------------------------------------")
+        numGeneration += 1
