@@ -8,7 +8,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 # To cripto the good sharpe ratio is 1.5, to stock is 1, to forex is 0.5
 good_sharpe_ratio = 1.5
 
-population_size = 10
+population_size = 20
 
 from ag import (
     generate_population,
