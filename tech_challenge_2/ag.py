@@ -51,8 +51,8 @@ def calculate_fitness(population):
             mean_returns.append(coin_data["mean_day_return"])
 
         cov_matrix = calculate_covariance_matrix(wallet["coins"])
-        print(f"wallet: {wallet}")
-        print(f"cov_matrix: {cov_matrix}")
+        # print(f"wallet: {wallet}")
+        # print(f"cov_matrix: {cov_matrix}")
         sharpe_ratio = calculate_portfolio_sharpe(
             wallet["weights"], mean_returns, cov_matrix, risk_free_rate
         )
@@ -215,5 +215,5 @@ def mutate(wallet):
     )
 
     # print(f"------------------------")
-    print(f"Mutated Wallet: {wallet}")
+    # print(f"Mutated Wallet: {wallet}")
     return wallet

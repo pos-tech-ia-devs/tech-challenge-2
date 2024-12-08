@@ -25,14 +25,14 @@ wallet = []
 
 def main():
     running = True
-    has_elitism = False
+    has_elitism = True
     numGeneration = 1
 
     ## generates population of ten wallets with 6 coins each
     population = generate_population(
         coins_quantity=6, population_size=population_size
     )
-    print(population)
+    # print(population)
     while running:
         print(f"Generation: {numGeneration}")
         print("-------------------------------------------------")
@@ -56,12 +56,12 @@ def main():
         else:
            selected = selection_tournament(population_with_fitness)
 
-
+        print(f"Best wallet this now: {selected}")
         new_individual = crossover(random.choices(selected, k=1)[0], random.choices(selected, k=1)[0])
         mutated_individual = mutate(new_individual)
 
         new_population = [mutated_individual]
-        print(f"new population: {new_population}")
+        # print(f"new population: {new_population}")
         while len(new_population) < population_size:
             parent1, parent2 = random.choices(population[:population_size], k=2)
             child = crossover(parent1, parent2)
@@ -71,6 +71,6 @@ def main():
         # overrides the population
         population.clear()
         population = new_population
-        print(population)
+        # print(population)
         print("-------------------------------------------------")
         numGeneration += 1
