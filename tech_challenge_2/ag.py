@@ -189,6 +189,57 @@ def crossover(parent1, parent2):
     # print(f"Crossover result: {child1}")
     return child1
 
+# Two point crossover
+def crossover(parent1, parent2):
+    # Ensure both parents have the same number of coins
+    if len(parent1["coins"]) != len(parent2["coins"]):
+        raise ValueError("Both parents must have the same number of coins.")
+
+    num_coins = len(parent1["coins"])
+    point1, point2 = sorted(random.sample(range(1, num_coins), 2))
+
+    # Create new offspring by swapping coins and weights between the crossover points
+    child1_coins = parent1["coins"][:point1] + parent2["coins"][point1:point2] + parent1["coins"][point2:]
+    child1_weights = parent1["weights"][:point1] + parent2["weights"][point1:point2] + parent1["weights"][point2:]
+
+    # Ensure each coin is unique
+    unique_coins_weights = {}
+    for coin, weight in zip(child1_coins, child1_weights):
+        if coin not in unique_coins_weights:
+            unique_coins_weights[coin] = weight
+
+    child1_coins, child1_weights = zip(*unique_coins_weights.items())
+    child1_coins, child1_weights = list(child1_coins), list(child1_weights)
+
+    # If the number of coins is less than the original, add random coins and weights from the parents
+    while len(child1_coins) < num_coins:
+        additional_index = random.randint(0, num_coins - 1)
+        additional_coin = parent1["coins"][additional_index]
+        additional_weight = parent1["weights"][additional_index]
+        if additional_coin not in child1_coins:
+            child1_coins.append(additional_coin)
+            child1_weights.append(additional_weight)
+
+    # If the number of coins is more than the original, trim the list
+    child1_coins = child1_coins[:num_coins]
+    child1_weights = child1_weights[:num_coins]
+
+    # Normalize weights to ensure the sum does not surpass 1
+    def normalize_weights(weights):
+        total_weight = sum(weights)
+        return [w / total_weight for w in weights]
+
+    child1_weights = normalize_weights(child1_weights)
+
+    # Create new wallet
+    child1 = {
+        "coins": child1_coins,
+        "weights": child1_weights,
+        "fitness": None,
+    }
+
+    return child1
+
 # Codification: Mutation by Inversion
 def mutate(wallet):
     total_coins = len(wallet["coins"])

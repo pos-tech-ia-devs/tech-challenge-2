@@ -25,7 +25,7 @@ wallet = []
 
 def main():
     running = True
-    has_elitism = True
+    has_elitism = False
     numGeneration = 1
 
     ## generates population of ten wallets with 6 coins each
@@ -60,7 +60,10 @@ def main():
         new_individual = crossover(random.choices(selected, k=1)[0], random.choices(selected, k=1)[0])
         mutated_individual = mutate(new_individual)
 
+        # start a new population
         new_population = [mutated_individual]
+        # ensure i don't lose the best wallet
+        new_population.extend(selected)
         # print(f"new population: {new_population}")
         while len(new_population) < population_size:
             parent1, parent2 = random.choices(population[:population_size], k=2)
