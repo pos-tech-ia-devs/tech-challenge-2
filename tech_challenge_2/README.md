@@ -17,7 +17,7 @@ Pegar dados históricos (1 a 2 anos)
 
 ## TODOS
 
-- Ajustar a seleção
+- Ajustar a seleção :done:
   - mudar de torneio para ranking e ver se te melhora
 - Ajustar o crossover
   Usar algumas das tecnicas de corte (Single-Point Crossover por exemplo)
