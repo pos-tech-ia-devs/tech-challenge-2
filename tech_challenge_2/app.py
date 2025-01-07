@@ -10,9 +10,12 @@ good_sharpe_ratio = 1.5
 
 population_size = 20
 
+coint_qtd = 5
+
 from ag import (
     generate_population,
     calculate_fitness,
+    calculate_sharpe_ratio_for_multiple_cryptos,
     verify_finishing_condition,
     selection_elitism,
     selection_tournament,
@@ -22,15 +25,26 @@ from ag import (
 
 wallet = []
 
+# Test fitness
+def main55():
+    population = [
+        {
+            'coins': [ 'Bitcoin', 'BNB'],
+            'weights': [0.5, 0.5]
+        },
+    ]
+    fitness = calculate_fitness(population)
+    print(fitness)
 
 def main():
     running = True
     has_elitism = False
+    has_elitism_and_tornament = True
     numGeneration = 1
 
     ## generates population of ten wallets with 6 coins each
     population = generate_population(
-        coins_quantity=6, population_size=population_size
+        coins_quantity=coint_qtd, population_size=population_size
     )
     # print(population)
     while running:
@@ -51,12 +65,20 @@ def main():
 
         ## selection of the best wallets
         selected = []
-        if has_elitism:
+        if has_elitism_and_tornament:
+            selected = selection_elitism(population_with_fitness)[:1] + selection_tournament(population_with_fitness)[:1]
+        elif has_elitism:
             selected = selection_elitism(population_with_fitness)
         else:
-           selected = selection_tournament(population_with_fitness)
+            selected = selection_tournament(population_with_fitness)
 
-        print(f"Best wallet this now: {selected}")
+        print(f"Best wallet fitness: {selected[0].get('fitness')}")
+        print(f"Best wallet weight: {selected[0].get('coins')}")
+        print(f"Best wallet weight: {selected[0].get('weights')}")
+        print(f"Best wallet fitness: {selected[1].get('fitness')}")
+        print(f"Best wallet coins: {selected[1].get('coins')}")
+        print(f"Best wallet weights: {selected[1].get('weights')}")
+
         new_individual = crossover(random.choices(selected, k=1)[0], random.choices(selected, k=1)[0])
         mutated_individual = mutate(new_individual)
 
@@ -64,12 +86,30 @@ def main():
         new_population = [mutated_individual]
         # ensure i don't lose the best wallet
         new_population.extend(selected)
-        # print(f"new population: {new_population}")
+
+        # Generate new random individuals to fill 50% of the population
+        num_random_individuals = population_size // 2
+        new_random_individuals = generate_population(coins_quantity=coint_qtd, population_size=num_random_individuals)
+
+        # Insert new random individuals one by one into new_population
+        for individual in new_random_individuals:
+            new_population.append(individual)
+        
         while len(new_population) < population_size:
+            print(f"ENTROU AQUI population {len(new_population)} population size {population_size}")
             parent1, parent2 = random.choices(population[:population_size], k=2)
             child = crossover(parent1, parent2)
             child = mutate(child)
+
+            child2 = crossover(parent1, child)
+            child2 = mutate(child2)
+
+            child3 = crossover(child, parent2)
+            child3 = mutate(child3)
+
             new_population.extend([child])
+            new_population.extend([child2])
+            new_population.extend([child3])
 
         # overrides the population
         population.clear()
