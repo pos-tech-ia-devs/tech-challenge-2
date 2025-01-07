@@ -36,6 +36,17 @@ def main55():
     fitness = calculate_fitness(population)
     print(fitness)
 
+def main22():
+    # Exemplo de uso
+    paths = [ 'Bitcoin', 'BNB']  # Substitua com os caminhos para seus arquivos
+    weights = [0.5, 0.5]  # Pesos correspondentes para as criptomoedas
+
+    sharpe_ratio, retorno_anualizado, volatilidade_anualizada = calculate_sharpe_ratio_for_multiple_cryptos(paths, weights)
+
+    print(f'Índice de Sharpe: {sharpe_ratio:.2f}')
+    print(f'Retorno Anualizado: {retorno_anualizado:.2%}')
+    print(f'Volatilidade Anualizada: {volatilidade_anualizada:.2%}')
+
 def main():
     running = True
     has_elitism = False

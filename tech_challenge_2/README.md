@@ -15,8 +15,6 @@ Pegar dados históricos (1 a 2 anos)
 
 ---
 
----
-
 ## TODOS
 
 - Ajustar a seleção :done:
