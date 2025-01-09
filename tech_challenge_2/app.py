@@ -7,15 +7,16 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # To cripto the good sharpe ratio is 1.5, to stock is 1, to forex is 0.5
 good_sharpe_ratio = 1.5
-
+# Good indice to cripto is between 2% and 10%
+risk_free_rate = 0.04
 population_size = 20
-
-coint_qtd = 5
+coins_qtd = 5
+max_generations = 100
+debug = True
 
 from ag import (
     generate_population,
     calculate_fitness,
-    calculate_sharpe_ratio_for_multiple_cryptos,
     verify_finishing_condition,
     selection_elitism,
     selection_tournament,
@@ -23,74 +24,69 @@ from ag import (
     mutate,
 )
 
-wallet = []
 
 # Test fitness
-def main55():
-    population = [
-        {
-            'coins': [ 'Bitcoin', 'BNB'],
-            'weights': [0.5, 0.5]
-        },
-    ]
-    fitness = calculate_fitness(population)
-    print(fitness)
+# def main():
+#     population = [
+#         {"coins": ["Aave", "Bitcoin", "BNB"], "weights": [0.25, 0.5, 0.25]},
+#     ]
+#     fitness = calculate_fitness(population)
+#     print(fitness)
 
-def main22():
-    # Exemplo de uso
-    paths = [ 'Bitcoin', 'BNB']  # Substitua com os caminhos para seus arquivos
-    weights = [0.5, 0.5]  # Pesos correspondentes para as criptomoedas
-
-    sharpe_ratio, retorno_anualizado, volatilidade_anualizada = calculate_sharpe_ratio_for_multiple_cryptos(paths, weights)
-
-    print(f'Índice de Sharpe: {sharpe_ratio:.2f}')
-    print(f'Retorno Anualizado: {retorno_anualizado:.2%}')
-    print(f'Volatilidade Anualizada: {volatilidade_anualizada:.2%}')
 
 def main():
     running = True
-    has_elitism = False
-    has_elitism_and_tornament = True
+    has_elitism_and_tournament = True
     numGeneration = 1
+    best_wallet = None
 
     ## generates population of ten wallets with 6 coins each
     population = generate_population(
-        coins_quantity=coint_qtd, population_size=population_size
+        coins_quantity=coins_qtd, population_size=population_size
     )
-    # print(population)
+
     while running:
         print(f"Generation: {numGeneration}")
         print("-------------------------------------------------")
         ## calculates the fitness of each wallet
-        population_with_fitness = calculate_fitness(population)
+        population_with_fitness = calculate_fitness(population, risk_free_rate)
 
         ## check if the finishing condition is met
-        can_stop = verify_finishing_condition(population_with_fitness, good_sharpe_ratio)
+        can_stop = verify_finishing_condition(
+            population_with_fitness, good_sharpe_ratio
+        )
 
         ## if the finishing condition is met, print the best wallet and stop the loop
-        if can_stop:
-            print(f"Best wallet: {population_with_fitness}")
+        if can_stop or numGeneration == max_generations:
+            print("-------------------------------------------------")
+            print("-------------------------------------------------")
+            print(f"Best wallet: {best_wallet}")
             running = False
             break
 
-
         ## selection of the best wallets
         selected = []
-        if has_elitism_and_tornament:
-            selected = selection_elitism(population_with_fitness)[:1] + selection_tournament(population_with_fitness)[:1]
-        elif has_elitism:
-            selected = selection_elitism(population_with_fitness)
+        if has_elitism_and_tournament:
+            selected = (
+                selection_elitism(population_with_fitness)[:1]
+                + selection_tournament(population_with_fitness)[:1]
+            )
         else:
-            selected = selection_tournament(population_with_fitness)
+            selected = selection_elitism(population_with_fitness)
 
-        print(f"Best wallet fitness: {selected[0].get('fitness')}")
-        print(f"Best wallet weight: {selected[0].get('coins')}")
-        print(f"Best wallet weight: {selected[0].get('weights')}")
-        print(f"Best wallet fitness: {selected[1].get('fitness')}")
-        print(f"Best wallet coins: {selected[1].get('coins')}")
-        print(f"Best wallet weights: {selected[1].get('weights')}")
+        best_wallet = selected[0]
+        if debug:
+            print(f"Best wallet fitness: {selected[0].get('fitness').round(2)}")
+            print(f"Best wallet weight: {selected[0].get('coins')}")
+            print(f"Best wallet weight: {selected[0].get('weights')}")
+            print("\n")
+            print(f"Actual wallet fitness: {selected[1].get('fitness').round(2)}")
+            print(f"Actual wallet coins: {selected[1].get('coins')}")
+            print(f"Actual wallet weights: {selected[1].get('weights')}")
 
-        new_individual = crossover(random.choices(selected, k=1)[0], random.choices(selected, k=1)[0])
+        new_individual = crossover(
+            random.choices(selected, k=1)[0], random.choices(selected, k=1)[0]
+        )
         mutated_individual = mutate(new_individual)
 
         # start a new population
@@ -100,14 +96,15 @@ def main():
 
         # Generate new random individuals to fill 50% of the population
         num_random_individuals = population_size // 2
-        new_random_individuals = generate_population(coins_quantity=coint_qtd, population_size=num_random_individuals)
+        new_random_individuals = generate_population(
+            coins_quantity=coins_qtd, population_size=num_random_individuals
+        )
 
         # Insert new random individuals one by one into new_population
         for individual in new_random_individuals:
             new_population.append(individual)
-        
+
         while len(new_population) < population_size:
-            print(f"ENTROU AQUI population {len(new_population)} population size {population_size}")
             parent1, parent2 = random.choices(population[:population_size], k=2)
             child = crossover(parent1, parent2)
             child = mutate(child)
@@ -126,5 +123,4 @@ def main():
         population.clear()
         population = new_population
         # print(population)
-        print("-------------------------------------------------")
         numGeneration += 1
