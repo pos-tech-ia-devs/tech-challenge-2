@@ -51,19 +51,19 @@ def run_app(
     numGeneration = 1
     best_wallet = None
 
-    ## generates population of ten wallets with 6 coins each
     population = generate_population(
         coins_quantity=coins_qtd, population_size=population_size
     )
 
-    st.markdown(
-        """
-        ---
-        """
-    )
+    if debug == False:
+        st.markdown(
+            """
+            ---
+            """
+        )
 
-    log_txt_box = st.empty()
-    log_txt = ""
+        log_txt_box = st.empty()
+        log_txt = ""
 
     while running:
         print(f"Generation: {numGeneration}")
@@ -81,32 +81,33 @@ def run_app(
             if debug:
                 print("-------------------------------------------------")
                 print(f"Best wallet: {best_wallet}")
+            else:
 
-            log_txt_box.empty()
-
-            with st.container():
-                st.subheader("🔍 Resultado Final")
-                st.markdown(
-                    f"📈 **Melhor Índice de Sharpe encontrado:** `{best_wallet.get('fitness').round(2)}`",
-                    help="O Índice de Sharpe é uma métrica que avalia a relação entre retorno e risco de uma carteira de investimentos.",
-                )
-
-                result = format_portfolio(
-                    best_wallet.get("coins"), best_wallet.get("weights")
-                )
+                log_txt_box.empty()
 
                 with st.container():
-                    st.write("💡 **Melhor Configuração de Carteira:**")
-                    st.markdown(result, unsafe_allow_html=True)
+                    st.subheader("🔍 Resultado Final")
+                    st.markdown(
+                        f"📈 **Melhor Índice de Sharpe encontrado:** `{best_wallet.get('fitness').round(2)}`",
+                        help="O Índice de Sharpe é uma métrica que avalia a relação entre retorno e risco de uma carteira de investimentos.",
+                    )
 
-                st.info(
-                    "🔔 Dica: Uma carteira bem balanceada considera tanto o retorno esperado quanto o risco associado. "
-                    "Certifique-se de revisar os dados antes de investir.",
-                    icon="💼",
-                )
+                    result = format_portfolio(
+                        best_wallet.get("coins"), best_wallet.get("weights")
+                    )
 
-            running = False
-            break
+                    with st.container():
+                        st.write("💡 **Melhor Configuração de Carteira:**")
+                        st.markdown(result, unsafe_allow_html=True)
+
+                    st.info(
+                        "🔔 Dica: Uma carteira bem balanceada considera tanto o retorno esperado quanto o risco associado. "
+                        "Certifique-se de revisar os dados antes de investir.",
+                        icon="💼",
+                    )
+
+                running = False
+                break
 
         ## selection of the best wallets
         selected = []
