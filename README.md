@@ -63,6 +63,14 @@ Para criar um novo script você terá que seguir a estrutura:
 NOME_DO_COMANDO = "NOME_DO_SOURCE.ARQUIVO_QUE_DESEJA:METODO_QUE_DEVE_SER_CHAMADO"
 ```
 
+### Rodar o streamlit
+
+Para rodar a parte visual:
+
+```bash
+streamlit run tech_challenge_2/view.py
+```
+
 ## Entendendo sobre o projeto
 
 Toda explicação está [aqui](tech_challenge_2/README.md)!
