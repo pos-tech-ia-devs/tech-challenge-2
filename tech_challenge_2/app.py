@@ -82,14 +82,19 @@ def run_app(
                 print("-------------------------------------------------")
                 print(f"Best wallet: {best_wallet}")
 
-            st.subheader("Resultado")
-            st.write(
-                f"Melhor sugestão de moedas e alocações com o  Índice de Sharpe {best_wallet.get('fitness').round(2)}:"
-            )
-            result = format_portfolio(
-                best_wallet.get("coins"), best_wallet.get("weights")
-            )
-            st.write(str(result))
+            logtxtbox.empty()
+
+            with st.container():
+                st.subheader("Resultado:")
+                st.markdown(
+                    f"Melhor Índice de Sharpe encontrado: **{best_wallet.get('fitness').round(2)}**",
+                )
+                result = format_portfolio(
+                    best_wallet.get("coins"), best_wallet.get("weights")
+                )
+                with st.container():
+                    st.write("Melhor sugestão de moedas e alocações:")
+                    st.markdown(f"**{result}**")
 
             running = False
             break

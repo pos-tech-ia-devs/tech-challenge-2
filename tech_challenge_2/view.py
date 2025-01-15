@@ -11,10 +11,15 @@ st.set_page_config(
 )
 
 from app import run_app
+from coins import get_coins
 
 with st.container():
     st.title("Tech Challenge 2")
     st.subheader("Gerador de carteira de Criptomoedas com Algoritmo Genético")
+    st.write(
+        "O algoritmo irá gerar a melhor carteira com base no [índice de Sharpe](https://pt.wikipedia.org/wiki/%C3%8Dndice_de_Sharpe)"
+    )
+
 with st.container():
     st.markdown("---")
     st.header("Instruções")
@@ -22,7 +27,7 @@ with st.container():
 
     sharpe_index = st.slider(
         "Selecione um valor de desejado para o índice de Sharpe (cripto 1.5, stock: 1.0, forex 0.5)",
-        0.5,
+        0.1,
         3.0,
         1.5,
     )
