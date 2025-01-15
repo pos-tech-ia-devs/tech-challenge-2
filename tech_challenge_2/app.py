@@ -3,7 +3,6 @@ import os
 import random
 import streamlit as st
 
-# Add the parent directory to the path so we can import the coins module
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -44,10 +43,10 @@ def run_app(
     population_size,
     coins_qtd,
     max_generations,
+    has_elitism_and_tournament="elitism_and_tournament",
     debug=False,
 ):
     running = True
-    has_elitism_and_tournament = True
     numGeneration = 1
     best_wallet = None
 
@@ -66,8 +65,6 @@ def run_app(
         log_txt = ""
 
     while running:
-        print(f"Generation: {numGeneration}")
-
         ## calculates the fitness of each wallet
         population_with_fitness = calculate_fitness(population, risk_free_rate)
 
@@ -111,13 +108,15 @@ def run_app(
 
         ## selection of the best wallets
         selected = []
-        if has_elitism_and_tournament:
+        if has_elitism_and_tournament == "elitism_and_tournament":
             selected = (
                 selection_elitism(population_with_fitness)[:1]
                 + selection_tournament(population_with_fitness)[:1]
             )
-        else:
+        elif has_elitism_and_tournament == "elitism":
             selected = selection_elitism(population_with_fitness)
+        else:
+            selected = selection_tournament(population_with_fitness)
 
         best_wallet = selected[0]
 
@@ -186,19 +185,11 @@ def run_app(
 
 
 def main():
-    # To cripto the good sharpe ratio is 1.5, to stock is 1, to forex is 0.5
-    good_sharpe_ratio = 1.5
-    # Good indice to cripto is between 2% and 10%
-    risk_free_rate = 0.04
-    population_size = 20
-    coins_qtd = 5
-    max_generations = 100
-
     run_app(
-        good_sharpe_ratio,
-        risk_free_rate,
-        population_size,
-        coins_qtd,
-        max_generations,
+        good_sharpe_ratio=1.5,
+        risk_free_rate=0.04,
+        population_size=20,
+        coins_qtd=5,
+        max_generations=100,
         debug=True,
     )
