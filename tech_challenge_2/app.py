@@ -62,8 +62,8 @@ def run_app(
         """
     )
 
-    logtxtbox = st.empty()
-    logtxt = ""
+    log_txt_box = st.empty()
+    log_txt = ""
 
     while running:
         print(f"Generation: {numGeneration}")
@@ -82,19 +82,28 @@ def run_app(
                 print("-------------------------------------------------")
                 print(f"Best wallet: {best_wallet}")
 
-            logtxtbox.empty()
+            log_txt_box.empty()
 
             with st.container():
-                st.subheader("Resultado:")
+                st.subheader("🔍 Resultado Final")
                 st.markdown(
-                    f"Melhor Índice de Sharpe encontrado: **{best_wallet.get('fitness').round(2)}**",
+                    f"📈 **Melhor Índice de Sharpe encontrado:** `{best_wallet.get('fitness').round(2)}`",
+                    help="O Índice de Sharpe é uma métrica que avalia a relação entre retorno e risco de uma carteira de investimentos.",
                 )
+
                 result = format_portfolio(
                     best_wallet.get("coins"), best_wallet.get("weights")
                 )
+
                 with st.container():
-                    st.write("Melhor sugestão de moedas e alocações:")
-                    st.markdown(f"**{result}**")
+                    st.write("💡 **Melhor Configuração de Carteira:**")
+                    st.markdown(result, unsafe_allow_html=True)
+
+                st.info(
+                    "🔔 Dica: Uma carteira bem balanceada considera tanto o retorno esperado quanto o risco associado. "
+                    "Certifique-se de revisar os dados antes de investir.",
+                    icon="💼",
+                )
 
             running = False
             break
@@ -120,27 +129,19 @@ def run_app(
             print(f"Actual wallet coins: {selected[1].get('coins')}")
             print(f"Actual wallet weights: {selected[1].get('weights')}")
         else:
-            logtxt = str(f"Geração atual {numGeneration}/{max_generations}\n\n")
-
-            logtxt += str(
-                f"Melhor Índice de Sharpe para a carteira:\n{selected[0].get('fitness').round(2)}\n\n"
+            log_txt = (
+                f"📊 Progresso da Geração: **{numGeneration}/{max_generations}**\n\n"
             )
+
+            log_txt += f"📈 Melhor Índice de Sharpe Atual: **{selected[0].get('fitness').round(2)}**\n\n"
 
             wallet_formatted = format_portfolio(
                 selected[0].get("coins"), selected[0].get("weights")
             )
 
-            logtxt += str(
-                f"Melhor carteira e sua alocação:\n{wallet_formatted.upper()}\n\n"
-            )
+            log_txt += f"💼 Melhor Carteira e Alocação Atual:\n**{wallet_formatted.upper()}**\n\n"
 
-            logtxtbox.text_area(
-                "Melhor fitness da Carteira: ",
-                logtxt,
-                height=200,
-                key=numGeneration,
-                disabled=True,
-            )
+            log_txt_box.markdown(log_txt)
 
         new_individual = crossover(
             random.choices(selected, k=1)[0], random.choices(selected, k=1)[0]

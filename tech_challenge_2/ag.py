@@ -124,7 +124,7 @@ def verify_finishing_condition(population, threshold):
         bool: True if any wallet meets or exceeds the threshold, otherwise False.
     """
     for w in population:
-        if w["fitness"] >= threshold:
+        if w["fitness"] > threshold:
             return True
     return False
 
