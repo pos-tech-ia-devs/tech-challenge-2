@@ -97,10 +97,10 @@ with st.container():
         help="Máximo de iterações que o algoritmo executará.",
     )
     sharpe_index = stop_conditions.slider(
-        "Índice de Sharpe Alvo (Cripto: 1.5, Ações: 1.0, Forex: 0.5)",
+        "Índice de Sharpe Alvo",
         min_value=0.1,
-        max_value=3.0,
-        value=1.5,
+        max_value=2.0,
+        value=1.0,
         help="Selecione o índice de Sharpe desejado para a carteira.",
     )
 
